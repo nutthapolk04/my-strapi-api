@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Showcase</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f4f4f5;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #18181b;
+            margin-bottom: 40px;
+        }
+        .car-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .car-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s;
+        }
+        .car-card:hover {
+            transform: translateY(-4px);
+        }
+        .car-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e4e4e7;
+        }
+        .car-content {
+            padding: 24px;
+        }
+        .car-brand {
+            color: #71717a;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .car-title {
+            margin: 8px 0;
+            font-size: 1.5rem;
+            color: #18181b;
+        }
+        .car-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 12px;
+        }
+        .car-description {
+            color: #52525b;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Showroom Mockup</h1>
+    <div id="grid" class="car-grid">
+        <!-- Content will be injected here -->
+        <div style="text-align:center; grid-column: 1/-1;">Loading cars...</div>
+    </div>
+
+    <script>
+        async function fetchCars() {
+            try {
+                const response = await fetch('/api/cars?populate=*');
+                const { data } = await response.json();
+                
+                const grid = document.getElementById('grid');
+                grid.innerHTML = data.map(car => {
+                    const imageUrl = car.CoverImage ? car.CoverImage.url : '';
+                    const price = new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(car.Price);
+                    
+                    return `
+                        <article class="car-card">
+                            <img src="${imageUrl}" alt="${car.Name}" class="car-image">
+                            <div class="car-content">
+                                <div class="car-brand">${car.Brand}</div>
+                                <h2 class="car-title">${car.Name}</h2>
+                                <div class="car-price">${price}</div>
+                                <p class="car-description">${car.Description}</p>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('grid').innerHTML = '<p style="text-align:center; color:red">Failed to load content</p>';
+            }
+        }
+
+        fetchCars();
+    </script>
+</body>
+</html>
