@@ -1,13 +1,13 @@
 export default ({ env }) => ({
   auth: {
-    secret: env('ADMIN_JWT_SECRET'),
+    secret: env('ADMIN_JWT_SECRET', 'toset_admin_jwt_secret_12345'),
   },
   apiToken: {
-    salt: env('API_TOKEN_SALT'),
+    salt: env('API_TOKEN_SALT', 'toset_api_token_salt_12345'),
   },
   transfer: {
     token: {
-      salt: env('TRANSFER_TOKEN_SALT'),
+      salt: env('TRANSFER_TOKEN_SALT', 'toset_transfer_token_salt_12345'),
     },
   },
   secrets: {
