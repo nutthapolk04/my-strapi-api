@@ -1,0 +1,43 @@
+{
+    "kind": "collectionType",
+    "collectionName": "cars",
+    "info": {
+        "singularName": "car",
+        "pluralName": "cars",
+        "displayName": "Car",
+        "description": "Mock content for cars"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "Name": {
+            "type": "string",
+            "required": true
+        },
+        "Description": {
+            "type": "text"
+        },
+        "Price": {
+            "type": "decimal"
+        },
+        "Brand": {
+            "type": "string"
+        },
+        "CoverImage": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "Details": {
+            "type": "blocks"
+        }
+    }
+}

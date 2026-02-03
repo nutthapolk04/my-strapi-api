@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Detail View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #111;
+            background: #fff;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: #000;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        nav a {
+            color: #ccc;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            color: white;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .category-tag {
+            color: #6366f1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            line-height: 1.1;
+            margin: 10px 0 20px;
+            letter-spacing: -1px;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Hero Image */
+        .hero-image-container {
+            width: 100%;
+            height: 500px;
+            background: #f4f4f5;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Body Content */
+        .content-body {
+            font-size: 1.125rem;
+            color: #333;
+        }
+
+        .price-tag {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 80px;
+            color: #666;
+        }
+
+        /* Error, Loading, Debug */
+        .error {
+            color: #dc2626;
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border: 1px solid #fee2e2;
+            background: #fef2f2;
+            border-radius: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        #debug-log {
+            font-family: monospace;
+            background: #1f2937;
+            color: #10b981;
+            padding: 10px;
+            margin: 20px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: pre-wrap;
+            display: none;
+            /* Hidden by default, shown on error or if needed */
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">StrapiCars</div>
+        <nav>
+            <a href="#">Models</a>
+            <a href="#">Inventory</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <div id="app">
+        <div class="loading">Loading content...</div>
+    </div>
+
+    <div id="debug-log"></div>
+
+    <footer>
+        <p>&copy; 2026 StrapiCars Inc. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function log(msg, data = null) {
+            console.log(msg, data || '');
+            const debugEl = document.getElementById('debug-log');
+            if (debugEl) {
+                const timestamp = new Date().toLocaleTimeString();
+                let text = `[${timestamp}] ${msg}`;
+                if (data) {
+                    try {
+                        text += '\n' + JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        text += '\n' + data;
+                    }
+                }
+                debugEl.innerText += text + '\n\n';
+            }
+        }
+
+        function showError(title, message, details = null) {
+            const app = document.getElementById('app');
+            const debugEl = document.getElementById('debug-log');
+            
+            // Show debug log on error
+            if(debugEl) debugEl.style.display = 'block';
+
+            app.innerHTML = `
+                <div class="error">
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                    ${details ? `<details style="text-align:left; margin-top:10px;"><summary>Technical Details</summary><pre style="overflow:auto; max-height:200px;">${details}</pre></details>` : ''}
+                </div>
+            `;
+        }
+
+        async function loadContent() {
+            log('Starting loadContent...');
+            const app = document.getElementById('app');
+            
+            try {
+                log('Fetching /api/cars?populate=* ...');
+                const response = await fetch('/api/cars?populate=*');
+                
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+                
+                const json = await response.json();
+                log('JSON received:', json);
+                
+                const { data } = json;
+                
+                if (!data || data.length === 0) {
+                    showError('No Content Found', 'The API returned no car entries. Please check if content is published.');
+                    return;
+                }
+
+                const car = data[0]; // Take the first one
+                log('Rendering car:', car.Name);
+
+                const imageUrl = car.CoverImage?.url || '';
+                const fullImageUrl = imageUrl ? (imageUrl.startsWith('http') ? imageUrl : `http://localhost:1337${imageUrl}`) : '';
+                
+                log('Image URL:', fullImageUrl);
+
+                let price = 'N/A';
+                if (car.Price) {
+                    try {
+                        price = new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(car.Price);
+                    } catch (e) {
+                        log('Error formatting price:', e);
+                        price = car.Price;
+                    }
+                }
+                
+                // Render Rich Text (simplified for paragraph blocks)
+                let detailsHtml = '';
+                if (car.Details && Array.isArray(car.Details)) {
+                     detailsHtml = car.Details.map(block => {
+                        if (block.type === 'paragraph' && block.children) {
+                            return `<p>${block.children.map(child => child.text || '').join('')}</p>`;
+                        }
+                        if (block.type === 'heading' && block.children) {
+                             return `<h${block.level}>${block.children.map(child => child.text || '').join('')}</h${block.level}>`;
+                        }
+                        return '';
+                    }).join('');
+                }
+
+                app.innerHTML = `
+                    <main>
+                        <div class="article-header">
+                            <span class="category-tag">${car.Brand || 'Brand'}</span>
+                            <h1>${car.Name || 'Untitled'}</h1>
+                            <div class="meta">Published on ${car.publishedAt ? new Date(car.publishedAt).toLocaleDateString() : 'Draft'}</div>
+                        </div>
+
+                        <div class="hero-image-container">
+                            ${fullImageUrl ? `<img src="${fullImageUrl}" alt="${car.Name}" class="hero-image">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;">No Image Available</div>'}
+                        </div>
+
+                        <div class="content-body">
+                            <div class="price-tag">${price}</div>
+                            <p class="lead">${car.Description || ''}</p>
+                            ${detailsHtml}
+                        </div>
+                    </main>
+                `;
+                log('Render complete.');
+
+            } catch (error) {
+                log('Caught error:', error);
+                showError('Something went wrong', error.message, error.stack);
+            }
+        }
+
+        // Run immediately
+        loadContent();
+    </script>
+</body>
+
+</html>
