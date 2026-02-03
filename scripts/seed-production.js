@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const API_URL = 'https://my-strapi-api-0fz5.onrender.com/api';
-const TOKEN = 'b7e43dec291c56b914d37f2e2509fdd2de789076d7ce83698d03d974490755f3ab78cf68e55035ed215c52b9032348bc8a0f3bc361f85dccf8dd679f3601a040b9facf688ea574da76682cfca9c5dcd6ddbc96dd192cf4e48917b5b2e17d357db95652c3c8fdc5a43fad647da485e6c4be12e58291be476bbf5d69017feb408c';
+const TOKEN = '218fea89885e9d52085e09d1d9f45630403a8211c149b321d2b37c62c2a818071d9e5ff4b90a96f8e6f731724e0f496ca9dc2c775033c513c1f786135c3569cafa838e0723bc54dc3c0c690040509221337d1fa65e82c61238e7c094e9ab11b63cc57763a8b78f17d3b44ba04466177082b2196eb2badccca426aadb42deb6c5';
 
 async function request(endpoint, method = 'GET', body = null, isUpload = false) {
     const headers = {
